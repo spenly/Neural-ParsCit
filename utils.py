@@ -235,9 +235,7 @@ def evaluate(parameters, f_eval, raw_sentences, parsed_sentences,
         assert len(y_preds) == len(y_reals)
         p_tags = [id_to_tag[y_pred] for y_pred in y_preds]
         r_tags = [id_to_tag[y_real] for y_real in y_reals]
-        if parameters['tag_scheme'] == 'iobes':
-            p_tags = iobes_iob(p_tags)
-            r_tags = iobes_iob(r_tags)
+
         for i, (y_pred, y_real) in enumerate(zip(y_preds, y_reals)):
             new_line = " ".join(raw_sentence[i][:-1] + [r_tags[i], p_tags[i]])
             predictions.append(new_line)
@@ -246,6 +244,7 @@ def evaluate(parameters, f_eval, raw_sentences, parsed_sentences,
 
     # Write predictions to disk and run CoNLL script externally
     eval_id = np.random.randint(1000000, 2000000)
+    print "eval_id is : ", eval_id 
     output_path = os.path.join(eval_temp, "eval.%i.output" % eval_id)
     scores_path = os.path.join(eval_temp, "eval.%i.scores" % eval_id)
     with codecs.open(output_path, 'w', 'utf8') as f:

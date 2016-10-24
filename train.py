@@ -28,10 +28,10 @@ optparser.add_option(
     "-t", "--test", default="",
     help="Test set location"
 )
-optparser.add_option(
-    "-s", "--tag_scheme", default="iobes",
-    help="Tagging scheme (IOB or IOBES)"
-)
+#optparser.add_option(
+#    "-s", "--tag_scheme", default="iobes",
+#    help="Tagging scheme (IOB or IOBES)"
+#)
 optparser.add_option(
     "-l", "--lower", default="0",
     type='int', help="Lowercase words (this will not affect character inputs)"
@@ -96,7 +96,7 @@ opts = optparser.parse_args()[0]
 
 # Parse parameters
 parameters = OrderedDict()
-parameters['tag_scheme'] = opts.tag_scheme
+#parameters['tag_scheme'] = opts.tag_scheme
 parameters['lower'] = opts.lower == 1
 parameters['zeros'] = opts.zeros == 1
 parameters['char_dim'] = opts.char_dim
@@ -118,7 +118,7 @@ assert os.path.isfile(opts.dev)
 assert os.path.isfile(opts.test)
 assert parameters['char_dim'] > 0 or parameters['word_dim'] > 0
 assert 0. <= parameters['dropout'] < 1.0
-assert parameters['tag_scheme'] in ['iob', 'iobes']
+#assert parameters['tag_scheme'] in ['iob', 'iobes']
 assert not parameters['all_emb'] or parameters['pre_emb']
 assert not parameters['pre_emb'] or parameters['word_dim'] > 0
 assert not parameters['pre_emb'] or os.path.isfile(parameters['pre_emb'])
@@ -138,7 +138,7 @@ print "Model location: %s" % model.model_path
 # Data parameters
 lower = parameters['lower']
 zeros = parameters['zeros']
-tag_scheme = parameters['tag_scheme']
+##tag_scheme = parameters['tag_scheme']
 
 # Load sentences
 train_sentences = loader.load_sentences(opts.train, lower, zeros)
@@ -146,9 +146,9 @@ dev_sentences = loader.load_sentences(opts.dev, lower, zeros)
 test_sentences = loader.load_sentences(opts.test, lower, zeros)
 
 # Use selected tagging scheme (IOB / IOBES)
-update_tag_scheme(train_sentences, tag_scheme)
-update_tag_scheme(dev_sentences, tag_scheme)
-update_tag_scheme(test_sentences, tag_scheme)
+##update_tag_scheme(train_sentences, tag_scheme)
+##update_tag_scheme(dev_sentences, tag_scheme)
+##update_tag_scheme(test_sentences, tag_scheme)
 
 # Create a dictionary / mapping of words
 # If we use pretrained embeddings, we add them to the dictionary.
@@ -200,7 +200,7 @@ if opts.reload:
 #
 singletons = set([word_to_id[k] for k, v
                   in dico_words_train.items() if v == 1])
-n_epochs = 100  # number of epochs over the training set
+n_epochs = 10  # number of epochs over the training set
 freq_eval = 1000  # evaluate on dev every freq_eval steps
 best_dev = -np.inf
 best_test = -np.inf
@@ -231,3 +231,6 @@ for epoch in xrange(n_epochs):
                 best_test = test_score
                 print "New best score on test."
     print "Epoch %i done. Average cost: %f" % (epoch, np.mean(epoch_costs))
+
+test_score = evaluate(parameters, f_eval, test_sentences, test_data, id_to_tag, dico_tags)
+model.save()
