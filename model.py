@@ -168,6 +168,10 @@ class Model(object):
                 print 'Loading pretrained embeddings from %s...' % pre_emb
                 pretrained = {}
                 emb_invalid = 0
+
+                #use gensim models as pretrained embeddings
+                pretrained = gensim.models.word2vec.Word2Vec.load_word2vec_format(pre_emb, binary=True)
+
 #                for i, line in enumerate(codecs.open(pre_emb, 'r', 'cp850')):
 #                    line = line.rstrip().split()
 #                    if len(line) == word_dim + 1:
@@ -178,8 +182,6 @@ class Model(object):
 #                        emb_invalid += 1
 #                if emb_invalid > 0:
 #                    print 'WARNING: %i invalid lines' % emb_invalid
-
-                pretrained = gensim.models.word2vec.Word2Vec.load_word2vec_format(pre_emb, binary=True)
 
                 c_found = 0
                 c_lower = 0
