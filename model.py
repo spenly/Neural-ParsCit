@@ -6,6 +6,7 @@ import theano
 import theano.tensor as T
 import codecs
 import cPickle
+import gensim
 
 from utils import shared, set_values, get_name
 from nn import HiddenLayer, EmbeddingLayer, DropoutLayer, LSTM, forward
@@ -87,6 +88,7 @@ class Model(object):
         """
         Write components values to disk.
         """
+        print "Saving parameter values to disk"
         for name, param in self.components.items():
             param_path = os.path.join(self.model_path, "%s.mat" % name)
             if hasattr(param, 'params'):
@@ -166,16 +168,19 @@ class Model(object):
                 print 'Loading pretrained embeddings from %s...' % pre_emb
                 pretrained = {}
                 emb_invalid = 0
-                for i, line in enumerate(codecs.open(pre_emb, 'r', 'cp850')):
-                    line = line.rstrip().split()
-                    if len(line) == word_dim + 1:
-                        pretrained[line[0]] = np.array(
-                            [float(x) for x in line[1:]]
-                        ).astype(np.float32)
-                    else:
-                        emb_invalid += 1
-                if emb_invalid > 0:
-                    print 'WARNING: %i invalid lines' % emb_invalid
+#                for i, line in enumerate(codecs.open(pre_emb, 'r', 'cp850')):
+#                    line = line.rstrip().split()
+#                    if len(line) == word_dim + 1:
+#                        pretrained[line[0]] = np.array(
+#                            [float(x) for x in line[1:]]
+#                        ).astype(np.float32)
+#                    else:
+#                        emb_invalid += 1
+#                if emb_invalid > 0:
+#                    print 'WARNING: %i invalid lines' % emb_invalid
+
+                pretrained = gensim.models.word2vec.Word2Vec.load_word2vec_format(pre_emb, binary=True)
+
                 c_found = 0
                 c_lower = 0
                 c_zeros = 0
@@ -194,7 +199,7 @@ class Model(object):
                         ]
                         c_zeros += 1
                 word_layer.embeddings.set_value(new_weights)
-                print 'Loaded %i pretrained embeddings.' % len(pretrained)
+#                print 'Loaded %i pretrained embeddings.' % len(pretrained)
                 print ('%i / %i (%.4f%%) words have been initialized with '
                        'pretrained embeddings.') % (
                             c_found + c_lower + c_zeros, n_words,

@@ -3,7 +3,7 @@ import re
 import codecs
 from utils import create_dico, create_mapping, zero_digits
 from utils import iob2, iob_iobes
-
+import gensim
 
 def load_sentences(path, lower, zeros):
     """
@@ -164,17 +164,19 @@ def augment_with_pretrained(dictionary, ext_emb_path, words):
     assert os.path.isfile(ext_emb_path)
 
     # Load pretrained embeddings from file
-    pretrained = set([
-        line.rstrip().split()[0].strip()
-        for line in codecs.open(ext_emb_path, 'r', 'cp850')
-        if len(ext_emb_path) > 0
-    ])
+    #pretrained = set([
+    #    line.rstrip().split()[0].strip()
+    #    for line in codecs.open(ext_emb_path, 'r', 'cp850')
+    #    if len(ext_emb_path) > 0
+    #])
+
+    pretrained = gensim.models.word2vec.Word2Vec.load_word2vec_format(ext_emb_path, binary=True)
 
     # We either add every word in the pretrained file,
     # or only words given in the `words` list to which
     # we can assign a pretrained embedding
     if words is None:
-        for word in pretrained:
+        for word in pretrained.vocab:
             if word not in dictionary:
                 dictionary[word] = 0
     else:
