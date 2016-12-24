@@ -3,7 +3,7 @@ import re
 import codecs
 from utils import create_dico, create_mapping, zero_digits
 from utils import iob2, iob_iobes
-import gensim
+import gensim, re
 
 def load_sentences(path, lower, zeros):
     """
@@ -132,7 +132,8 @@ def prepare_dataset(sentences, word_to_id, char_to_id, tag_to_id, lower=False):
         - word char indexes
         - tag indexes
     """
-    def f(x): return x.lower() if lower else x
+    #def f(x): return x.lower() if lower else x
+    def f(x): return re.sub('\d', '0', x)
     data = []
     for s in sentences:
         str_words = [w[0] for w in s]
