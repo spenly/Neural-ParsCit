@@ -95,7 +95,12 @@ class Model(object):
                 param_values = {p.name: p.get_value() for p in param.params}
             else:
                 param_values = {name: param.get_value()}
-            scipy.io.savemat(param_path, param_values)
+            #No need to save embeding values as they are never updated
+            #directly use the pretrained embeddings file
+            if name=='word_layer':
+                continue
+            else:
+                scipy.io.savemat(param_path, param_values)
 
     def reload(self):
         """
@@ -103,7 +108,11 @@ class Model(object):
         """
         for name, param in self.components.items():
             param_path = os.path.join(self.model_path, "%s.mat" % name)
-            param_values = scipy.io.loadmat(param_path)
+            #load word layer during build from pretrained embeddings file.
+            if name=='word_layer':
+                continue
+            else:
+                param_values = scipy.io.loadmat(param_path)
             if hasattr(param, 'params'):
                 for p in param.params:
                     set_values(p.name, p, param_values[p.name])
