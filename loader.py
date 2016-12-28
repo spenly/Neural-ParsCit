@@ -124,35 +124,36 @@ def prepare_sentence(str_words, word_to_id, char_to_id, lower=False):
         'caps': caps
     }
 
-
-def prepare_dataset(sentences, word_to_id, char_to_id, tag_to_id, lower=False):
+def prepare_dataset(sentences, word_to_id, char_to_id, lower=False):
     """
     Prepare the dataset. Return a list of lists of dictionaries containing:
         - word indexes
         - word char indexes
         - tag indexes
     """
-    #def f(x): return x.lower() if lower else x
-    def f(x): return re.sub('\d', '0', x)
+    #Replace all digits with 0
+    def f(x):
+        x = x.lower() if lower else x
+        return re.sub('\d', '0', x) if zeros else x
     data = []
     for s in sentences:
         str_words = [w[0] for w in s]
         words = [word_to_id[f(w) if f(w) in word_to_id else '<UNK>']
                  for w in str_words]
         # Skip characters that are not in the training set
+        #for num, word in enumerate(words):
+        #        if word < 0:
+        #                   words[num]=word_to_id['<UNK>']
         chars = [[char_to_id[c] for c in w if c in char_to_id]
                  for w in str_words]
         caps = [cap_feature(w) for w in str_words]
-        tags = [tag_to_id[w[-1]] for w in s]
         data.append({
             'str_words': str_words,
             'words': words,
             'chars': chars,
             'caps': caps,
-            'tags': tags,
         })
     return data
-
 
 def augment_with_pretrained(dictionary, ext_emb_path, words):
     """
