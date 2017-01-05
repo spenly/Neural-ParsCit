@@ -7,7 +7,8 @@ import gensim, re
 
 def load_sentences(path, lower, zeros):
     """
-    Load sentences. A line must contain at least a word and its tag.
+    Load sentences. A line must contain only one word of the citation string
+    while running the model and the word and corresponding tag while training.
     Sentences are separated by empty lines.
     """
     sentences = []
@@ -21,7 +22,6 @@ def load_sentences(path, lower, zeros):
                 sentence = []
         else:
             word = line.split()
-            assert len(word) >= 2
             sentence.append(word)
     if len(sentence) > 0:
         if 'DOCSTART' not in sentence[0][0]:
@@ -124,7 +124,7 @@ def prepare_sentence(str_words, word_to_id, char_to_id, lower=False):
         'caps': caps
     }
 
-def prepare_dataset(sentences, word_to_id, char_to_id, lower=False):
+def prepare_dataset(sentences, word_to_id, char_to_id, lower=False, zeros=False):
     """
     Prepare the dataset. Return a list of lists of dictionaries containing:
         - word indexes

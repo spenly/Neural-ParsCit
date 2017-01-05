@@ -1,22 +1,24 @@
-## NER Tagger
+## Neural ParsCit
 
-NER Tagger is an implementation of a Named Entity Recognizer that obtains state-of-the-art performance in NER on the 4 CoNLL datasets (English, Spanish, German and Dutch) without resorting to any language-specific knowledge or resources such as gazetteers. Details about the model can be found at: http://arxiv.org/abs/1603.01360
+Neural ParsCit is a citation string parser which parses reference strings into its component tags such as Author, Journal, Location, Date, etc. Neural ParsCit uses Long Short Term Memory (LSTM), a deep learning model to parse the reference strings. This deep learning algorithm is chosen as it is designed to perform sequence-to-sequence labeling tasks such as ours. Input to the model are word embeddings which are vector representation of words. We provide word embeddings as well as character embeddings as input to the network.
 
 
 ## Initial setup
 
-To use the tagger, you need Python 2.7, with Numpy and Theano installed.
+To use the tagger, you need Python 2.7, with Numpy, Theano and Gensim installed.
 
 
-## Tag sentences
+## Parse citation strings
 
-The fastest way to use the tagger is to use one of the pretrained models:
+The fastest way to use the parser is to run state-of-the-art pretrained model as follows:
 
 ```
-./tagger.py --model models/english/ --input input.txt --output output.txt
+./run.py --model_path models/neuralParsCit/ --pre_emb <vectors.bin> --run shell
+./run.py --model_path models/neuralParsCit/ --pre_emb <vectors.bin> --run file -i input_file -o output_file
 ```
+The script can run interactively or input can be passed in a file. In the interactive session, the strings are passed one by one. The result is displayed on standard output. If the file option is chosen, the input is given in a file specified by -i option and the output is stored in the directed file. Using the file option, multiple citation strings can be parsed. 
 
-The input file should contain one sentence by line, and they have to be tokenized. Otherwise, the tagger will perform poorly.
+The state-of-the-art trained model is provided in the models folder and is named neuralParsCit. The binary file for word embeddings is provided in the docker image of the current version of neural ParsCit. The hyper parameter ```discarded``` is the number of embeddings not used in our model. Retained words have a frequency of more than 0 in the ACM citation literature from 1994-2014.
 
 
 ## Train a model
@@ -34,4 +36,4 @@ There are many parameters you can tune (CRF, dropout rate, embedding dimension, 
 ./train.py --help
 ```
 
-Input files for the training script have to follow the same format than the CoNLL2003 sharing task: each word has to be on a separate line, and there must be an empty line after each sentence. A line must contain at least 2 columns, the first one being the word itself, the last one being the named entity. It does not matter if there are extra columns that contain tags or chunks in between. Tags have to be given in the IOB format (it can be IOB1 or IOB2).
+Input files for the training script have to follow the following format: each word of the citation string and its corresponding tag has to be on a separate line. All citation strings must be separated by a blank line.
