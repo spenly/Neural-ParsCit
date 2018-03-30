@@ -39,7 +39,7 @@ new_weights = model.components['word_layer'].embeddings.get_value()
 n_words = len(model.id_to_word)
 
 #only include pretrained embeddings for 640780 most frequent words
-freq = json.load(open('/home/wenqiang/tagger-master/mydockerbuild2/mydockerbuild/freq', 'r'))
+freq = json.load(open('freq', 'r'))
 words = [item[0] for item in freq]
 
 #Create new mapping because model.id_to_word only is an Ordered dict of only training and testing data
@@ -111,7 +111,7 @@ while True:
         os.remove(test_file)
     file = open(test_file, 'a')
     for string in strings:
-        file.write('\n'.join(string.split(' '))+'\n')
+        file.write('\n'.join(string.split())+'\n')
     file.close()
     test_sentences = load_sentences(test_file, lower, zeros)
     data = prepare_dataset(test_sentences, word_to_id, char_to_id, lower, True)
