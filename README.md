@@ -39,9 +39,9 @@ There are many parameters you can tune (CRF, dropout rate, embedding dimension, 
 Input files for the training script have to follow the following format: each word of the citation string and its corresponding tag has to be on a separate line. All citation strings must be separated by a blank line.
 
 
-If you want to use the word embeddings trained on ACM refrences, and the freq., please download from WING homepage: http://wing.comp.nus.edu.sg/?page_id=158 
+If you want to use the word embeddings trained on ACM refrences, and the freq., please download from WING homepage: http://wing.comp.nus.edu.sg/?page_id=158 (currently not avaible due to space issue, mail animesh@comp.nus.edu.sg, animeshprasad3@gmail.com for a copy) 
 
-Please consider citing following piblication(s) if you use Neural ParsCit:
+Details about the training data, experiments can be found in the following article. Traning data and CRF baseline can be downloaded from https://github.com/knmnyn/ParsCit. Please consider citing following piblication(s) if you use Neural ParsCit:
 ```
 @article{animesh2018neuralparscit,
   title={Neural ParsCit: A Deep Learning Based Reference String Parser},
