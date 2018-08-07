@@ -59,7 +59,7 @@ class EmbeddingLayer(object):
     Output: tensor of dimension (dim*, output_dim)
     """
 
-    def __init__(self, input_dim, output_dim, name='embedding_layer'):
+    def __init__(self, input_dim, output_dim, name='embedding_layer', train=True):
         """
         Typically, input_dim is the vocabulary size,
         and output_dim the embedding dimension.
@@ -67,10 +67,12 @@ class EmbeddingLayer(object):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.name = name
+        self.train = train
 
         # Randomly generate weights
         self.embeddings = shared((input_dim, output_dim),
-                                 self.name + '__embeddings')
+                                 self.name + '__embeddings',
+                                 train=self.train)
 
         # Define parameters
         self.params = [self.embeddings]

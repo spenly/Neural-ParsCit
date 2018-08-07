@@ -172,7 +172,7 @@ def augment_with_pretrained(dictionary, ext_emb_path, words):
     #    if len(ext_emb_path) > 0
     #])
 
-    pretrained = gensim.models.word2vec.Word2Vec.load_word2vec_format(ext_emb_path, binary=True)
+    pretrained = gensim.models.KeyedVectors.load_word2vec_format(ext_emb_path, binary=True)
 
     # We either add every word in the pretrained file,
     # or only words given in the `words` list to which

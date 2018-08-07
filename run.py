@@ -1,9 +1,15 @@
+from __future__ import print_function
+import os
+import re
+import optparse
+import json
+import numpy as np
+import theano
+from gensim.models import KeyedVectors
 from utils import evaluate, create_input
 from model import Model
 from loader import augment_with_pretrained, load_sentences, prepare_dataset
-import numpy as np
-import itertools
-import gensim, re, optparse, json, os
+
 
 optparser = optparse.OptionParser()
 optparser.add_option(
@@ -28,40 +34,36 @@ optparser.add_option(
 )
 opts = optparser.parse_args()[0]
 
-model_path = opts.model_path
-model = Model(model_path=model_path)
+model = Model(model_path=opts.model_path)
 f = model.build(training=False, **model.parameters)
 model.reload()
 
 model.parameters['pre_emb'] = opts.pre_emb
-pretrained = gensim.models.word2vec.Word2Vec.load_word2vec_format(model.parameters['pre_emb'], binary=True)
-new_weights = model.components['word_layer'].embeddings.get_value()
+pretrained = KeyedVectors.load(model.parameters['pre_emb'], mmap='r')
 n_words = len(model.id_to_word)
 
 #only include pretrained embeddings for 640780 most frequent words
-freq = json.load(open('freq', 'r'))
-words = [item[0] for item in freq]
+words = [item[0] for item in json.load(open('freq', 'r'))]
 
 #Create new mapping because model.id_to_word only is an Ordered dict of only training and testing data
 model.id_to_word = {}
 
-discarded=640780
-for i in xrange((n_words/2), n_words):
+discarded = 640780
+new_weights = np.empty((n_words - n_words/2 + 1, 500), dtype=theano.config.floatX)
+for i in range((n_words/2), n_words):
     word = words[i]
+    lower = word.lower()
+    digits = re.sub(r'\d', '0', lower)
+    idx = i - discarded
     if word in pretrained:
-        model.id_to_word[i-discarded] = word
-        new_weights[i-discarded] = pretrained[word]
-#        c_found += 1
-    elif word.lower() in pretrained:
-        model.id_to_word[i-discarded] = word.lower()
-        new_weights[i-discarded] = pretrained[word.lower()]
-#        c_lower += 1
-    elif re.sub('\d', '0', word.lower()) in pretrained:
-        model.id_to_word[i-discarded] = re.sub('\d', '0', word.lower())
-        new_weights[i-discarded] = pretrained[
-            re.sub('\d', '0', word.lower())
-        ]
- #       c_zeros += 1
+        model.id_to_word[idx] = word
+        new_weights[idx] = pretrained[word]
+    elif lower in pretrained:
+        model.id_to_word[idx] = lower
+        new_weights[idx] = pretrained[lower]
+    elif digits in pretrained:
+        model.id_to_word[idx] = digits
+        new_weights[idx] = pretrained[digits]
 
 model.id_to_word[0] = '<UNK>'
 #Reset the values of word layer
@@ -76,27 +78,8 @@ zeros = model.parameters['zeros']
 word_to_id = {v:i for i,v in model.id_to_word.items()}
 char_to_id = {v:i for i,v in model.id_to_char.items()}
 
-
-def cap_feature(s):
-    """
-    Capitalization feature:
-    0 = low caps
-    1 = all caps
-    2 = first letter caps
-    3 = one capital (not first letter)
-    """
-    if s.lower() == s:
-        return 0
-    elif s.upper() == s:
-        return 1
-    elif s[0].upper() == s[0]:
-        return 2
-    else:
-        return 3
-
 while True:
-    run_option = opts.run
-    if run_option=='file':
+    if opts.run == 'file':
         assert opts.input_file
         assert opts.output_file
         input_file = opts.input_file
@@ -116,19 +99,19 @@ while True:
     test_sentences = load_sentences(test_file, lower, zeros)
     data = prepare_dataset(test_sentences, word_to_id, char_to_id, lower, True)
     for citation in data:
-        input = create_input(citation, model.parameters, False)
-        y_pred = np.array(f[1](*input))[1:-1]
+        inputs = create_input(citation, model.parameters, False)
+        y_pred = np.array(f[1](*inputs))[1:-1]
         tags = []
-        for i in xrange(len(y_pred)):
+        for i in range(len(y_pred)):
             tags.append(model.id_to_tag[y_pred[i]])
         output = []
         for num, word in enumerate(citation['str_words']):
             output.append(word+'\t'+tags[num])
-        if run_option=='file':
+        if opts.run == 'file':
             file = open(output_file, 'w')
             file.write('\n'.join(output))
             file.close()
         else:
-            print '\n'.join(output)
-    if run_option=='file':
+            print('\n'.join(output))
+    if opts.run == 'file':
         break
