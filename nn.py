@@ -1,4 +1,6 @@
+import logging
 import theano
+import numpy as np
 import theano.tensor as T
 from utils import shared
 
@@ -59,7 +61,7 @@ class EmbeddingLayer(object):
     Output: tensor of dimension (dim*, output_dim)
     """
 
-    def __init__(self, input_dim, output_dim, name='embedding_layer', train=True):
+    def __init__(self, input_dim, output_dim, name='embedding_layer', pretrained=None):
         """
         Typically, input_dim is the vocabulary size,
         and output_dim the embedding dimension.
@@ -67,12 +69,24 @@ class EmbeddingLayer(object):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.name = name
-        self.train = train
+        if pretrained:
+            if u'<UNK>' not in pretrained:
+                logging.warn('<UNK> is not found in the pretrained and will be added.'
+                             'This will consume more memory than usual.')
+                pretrained.add([u'<UNK>'],
+                               [np.zeros((pretrained.vectors.shape[1], ),
+                                         dtype=theano.config.floatX)])
 
-        # Randomly generate weights
-        self.embeddings = shared((input_dim, output_dim),
-                                 self.name + '__embeddings',
-                                 train=self.train)
+            if pretrained.vectors.dtype == theano.config.floatX:
+                self.embeddings = theano.shared(value=pretrained.vectors,
+                                                name=self.name + '__embeddings')
+            else:
+                self.embeddings = theano.shared(value=pretrained.vectors.astype(theano.config.floatX),
+                                                name=self.name + '__embeddings')
+        else:
+            # Randomly generate weights
+            self.embeddings = shared((input_dim, output_dim),
+                                     self.name + '__embeddings')
 
         # Define parameters
         self.params = [self.embeddings]

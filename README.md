@@ -17,16 +17,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Word Embeddings
-
-The word embeddings does not come with this repository. You can obtain the [word embeddings](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/vectors.tar.gz) and the [word frequency](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/freq) from WING website.
-
-You will need to extract the content of the word embedding archive (`vectors.tar.gz`) to the root directory for this repository by running `tar xfz vectors.tar.gz`.
-
 ### Using Docker
 
 1. Build the image: `docker build -t theano-gensim - < Dockerfile`
 1. Run the repo mounted to the container: `docker run -it -v /path/to/Neural-ParsCit:/usr/src --name np theano-gensim:latest /bin/bash`
+
+## Word Embeddings
+
+The word embeddings do not come with this repository. You can obtain the [word embeddings without UNK](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/vectors.tar.gz) [word embeddings with UNK](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/vectors_with_unk.tar.gz) and the [word frequency](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/freq) (deprecated in 1.0.3 as the entire word vectors can be loaded with less memory) from WING website. Please read the next section on availability of `UNK`.
+
+You will need to extract the content of the word embedding archive (`vectors.tar.gz`) to the root directory for this repository by running `tar xfz vectors.tar.gz`.
+
+### Without UNK
+
+If the loaded word embeddings do not have `<UNK>`, your instance will not benefit from the lazy loading of the word vectors and hence the reduction of memory requirements.
+
+Without UNK, at least 7.5 GB of memory is required as the entire word vectors need to be instantiated in memory to create the new matrix. Comparing with embeddings with UNK, which only 4.5 GB is required.
 
 ## Parse citation strings
 

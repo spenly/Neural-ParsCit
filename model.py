@@ -13,7 +13,8 @@ from utils import shared, set_values, get_name
 from nn import HiddenLayer, EmbeddingLayer, DropoutLayer, LSTM, forward
 from optimization import Optimization
 
-logging.basicConfig(format="%(asctime)-15s %(message)s", level=logging.INFO)
+logging.basicConfig(format="[%(levelname)s] %(asctime)-15s: %(message)s",
+                    level=logging.INFO)
 logger = logging.getLogger
 
 class Model(object):
@@ -169,17 +170,13 @@ class Model(object):
         # Word inputs
         if word_dim:
             input_dim += word_dim
-            word_layer = EmbeddingLayer(n_words, word_dim, name='word_layer', train=training)
-            word_input = word_layer.link(word_ids)
-            inputs.append(word_input)
             # Initialize with pretrained embeddings
-            if pre_emb and training:
+            pretrained = self.load_word_embeddings(pre_emb)
+            if training:
+                word_layer = EmbeddingLayer(n_words, word_dim, name='word_layer')
                 new_weights = word_layer.embeddings.get_value()
                 logging.info("Loading pretrained embeddings from %s...", pre_emb)
                 emb_invalid = 0
-
-                #use gensim models as pretrained embeddings
-                pretrained = KeyedVectors.load(pre_emb, mmap='r')
 
 #                for i, line in enumerate(codecs.open(pre_emb, 'r', 'cp850')):
 #                    line = line.rstrip().split()
@@ -216,8 +213,13 @@ class Model(object):
                              n_words, 100. * (c_found + c_lower + c_zeros) / n_words)
                 logging.info('%i found directly, %i after lowercasing, '
                              '%i after lowercasing + zero.', c_found, c_lower, c_zeros)
+            else:
+                word_layer = EmbeddingLayer(n_words, word_dim, name='word_layer',
+                                            pretrained=pretrained)
+                self.id_to_word.update({i: w for i, w in enumerate(pretrained.index2entity)})
 
-        #
+            word_input = word_layer.link(word_ids)
+            inputs.append(word_input)
         # Chars inputs
         #
         if char_dim:
@@ -414,7 +416,8 @@ class Model(object):
         if isinstance(embeddings, KeyedVectors):
             return embeddings
         else:
-            if os.path.isfile(embeddings) and os.path.isfile(embeddings + 'vectors.npy'):
-                return KeyedVectors.load(embeddings, mmap=mode)
+            if os.path.isfile(embeddings) and os.path.isfile(embeddings + '.vectors.npy'):
+                v = KeyedVectors.load(embeddings, mmap=mode)
+                return v
             else:
                 raise IOError("{embeddings} cannot be found.".format(embeddings=embeddings))
