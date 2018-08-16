@@ -94,9 +94,6 @@ def test_inference_performance():
 
     assert len(preds) == len(dataset.examples)
 
-    preds[1]
-    results = []
-
     for P, T in zip(preds, dataset.examples):
         for p, t in zip(P, zip(T.text, T.entity)):
             results.append((p[1], tag_to_id[t[1]]))
@@ -108,7 +105,6 @@ def test_inference_performance():
         'macro_f1': f1_score(true, pred, average='macro')
     }
 
-    eval_metrics
     data_file.close()
 
     assert eval_metrics == pytest.approx({'macro_f1': 0.98, 'micro_f1': 0.99}, abs=0.01)
