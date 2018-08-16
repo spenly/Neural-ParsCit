@@ -2,10 +2,7 @@ import os
 import tempfile
 import pytest
 import requests
-import json
-import re
 import numpy as np
-from gensim.models import KeyedVectors
 
 from model import Model
 from loader import load_sentences, prepare_dataset
@@ -36,38 +33,10 @@ def test_inference_performance():
     dataset = SequenceTaggingDataset(data_file.name, fields, separator=" ")
 
     model = Model(model_path='models/neuralParsCit')
-    model.parameters['pre_emb'] = os.path.join(os.getcwd(), 'vectors.kv') # TODO Change to vectors_with_unk.kv
+    model.parameters['pre_emb'] = os.path.join(os.getcwd(), 'vectors_with_unk.kv')
     f = model.build(training=False, **model.parameters)
 
     model.reload()
-
-    pretrained = KeyedVectors.load(model.parameters['pre_emb'], mmap='r') # TODO Remove
-    n_words = len(model.id_to_word) # TODO Remove
-    words = [item[0] for item in json.load(open('freq', 'r'))] # TODO Remove
-    model.id_to_word = {} # TODO Remove
-
-    discarded = 640780 # TODO Remove
-    new_weights = np.empty((n_words - n_words/2 + 1, 500), dtype='float32') # TODO Remove
-
-    for i in range((n_words/2), n_words): # TODO Remove
-        word = words[i]
-        lower = word.lower()
-        digits = re.sub(r'\d', '0', lower)
-        idx = i - discarded
-        if word in pretrained:
-            model.id_to_word[idx] = word
-            new_weights[idx] = pretrained[word]
-        elif lower in pretrained:
-            model.id_to_word[idx] = lower
-            new_weights[idx] = pretrained[lower]
-        elif digits in pretrained:
-            model.id_to_word[idx] = digits
-            new_weights[idx] = pretrained[digits]
-
-    model.id_to_word[0] = '<UNK>' # TODO Remove
-    model.components['word_layer'].embeddings.set_value(new_weights) # TODO Remove
-    del pretrained # TODO Remove
-    del new_weights # TODO Remove
 
     word_to_id = {v:i for i, v in model.id_to_word.items()}
     char_to_id = {v:i for i, v in model.id_to_char.items()}
@@ -97,7 +66,7 @@ def test_inference_performance():
     assert len(preds) == len(dataset.examples)
 
     results = []
-    
+
     for P, T in zip(preds, dataset.examples):
         for p, t in zip(P, zip(T.text, T.entity)):
             results.append((p[1], tag_to_id[t[1]]))
@@ -110,5 +79,5 @@ def test_inference_performance():
     }
 
     data_file.close()
-
+    
     assert eval_metrics == pytest.approx({'macro_f1': 0.98, 'micro_f1': 0.99}, abs=0.01)
