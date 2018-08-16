@@ -96,6 +96,8 @@ def test_inference_performance():
 
     assert len(preds) == len(dataset.examples)
 
+    results = []
+    
     for P, T in zip(preds, dataset.examples):
         for p, t in zip(P, zip(T.text, T.entity)):
             results.append((p[1], tag_to_id[t[1]]))
