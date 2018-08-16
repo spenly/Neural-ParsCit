@@ -12,10 +12,6 @@ from loader import load_sentences, prepare_dataset
 from utils import create_input
 
 CORA_URL = "https://raw.githubusercontent.com/knmnyn/ParsCit/master/crfpp/traindata/cora.train"
-WORD = Field(init_token='<bos>', eos_token='<eos>')
-CHAR_NESTING = Field(tokenize=list, init_token='<bos>', eos_token='<eos>')
-CHAR = NestedField(CHAR_NESTING, init_token='<bos>', eos_token='<eos>')
-ENTITY = Field(init_token='<bos>', eos_token='<eos>')
 
 # Skip this test when running in CI as the amount of memory is not sufficient
 # to build the model
@@ -24,7 +20,12 @@ def test_inference_performance():
     from sklearn.metrics import f1_score
     from torchtext.datasets import SequenceTaggingDataset
     from torchtext.data import Field, NestedField
-    
+
+    WORD = Field(init_token='<bos>', eos_token='<eos>')
+    CHAR_NESTING = Field(tokenize=list, init_token='<bos>', eos_token='<eos>')
+    CHAR = NestedField(CHAR_NESTING, init_token='<bos>', eos_token='<eos>')
+    ENTITY = Field(init_token='<bos>', eos_token='<eos>')
+
     data_file = tempfile.NamedTemporaryFile(delete=True)
 
     # TODO Need to be decoded in Python 3
