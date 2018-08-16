@@ -5,9 +5,6 @@ import requests
 import json
 import re
 import numpy as np
-from sklearn.metrics import f1_score
-from torchtext.datasets import SequenceTaggingDataset
-from torchtext.data import Field, NestedField
 from gensim.models import KeyedVectors
 
 from model import Model
@@ -24,6 +21,10 @@ ENTITY = Field(init_token='<bos>', eos_token='<eos>')
 # to build the model
 @pytest.mark.skipif(os.getenv("CI") == 'true', reason="Not running in CI")
 def test_inference_performance():
+    from sklearn.metrics import f1_score
+    from torchtext.datasets import SequenceTaggingDataset
+    from torchtext.data import Field, NestedField
+    
     data_file = tempfile.NamedTemporaryFile(delete=True)
 
     # TODO Need to be decoded in Python 3
