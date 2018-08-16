@@ -1,5 +1,7 @@
 FROM python:2
 
+ENV ENVIRONMENT prod 
+
 WORKDIR /usr/src
 
 RUN apt-get update \
