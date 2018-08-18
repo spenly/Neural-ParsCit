@@ -24,15 +24,15 @@ pip install -r requirements.txt
 
 ## Word Embeddings
 
-The word embeddings do not come with this repository. You can obtain the [word embeddings without `<UNK>`](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/vectors.tar.gz) or [word embeddings with `<UNK>`](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/vectors_with_unk.tar.gz) and the [word frequency](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/freq) (deprecated in v1.0.3 as the entire word vectors can be loaded with less memory) from WING website. Please read the next section on availability of `UNK`.
+The word embeddings do not come with this repository. You can obtain the [word embeddings without `<UNK>`](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/vectors.tar.gz) (not recommended for v1.0.3) or [word embeddings with `<UNK>`](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/vectors_with_unk.tar.gz) and the [word frequency](http://wing.comp.nus.edu.sg/~wing.nus/resources/NParsCit/freq) (deprecated in v1.0.3 as the entire word vectors can be loaded with less memory) from WING website. Please read the next section on availability of `<UNK>` in word embeddings.
 
-You will need to extract the content of the word embedding archive (`vectors.tar.gz`) to the root directory for this repository by running `tar xfz vectors.tar.gz`.
+You will need to extract the content of the word embedding archive (`vectors_with_unk.tar.gz`) to the root directory for this repository by running `tar xfz vectors_with_unk.tar.gz`.
 
-### Without UNK
+### Embeddings Without `<UNK>`
 
-If the loaded word embeddings do not have `<UNK>`, your instance will not benefit from the lazy loading of the word vectors and hence the reduction of memory requirements.
+If the word embeddings provided do not have `<UNK>`, your instance will not benefit from the lazy loading of the word vectors and hence the reduction of memory requirements.
 
-Without `<UNK>`, at least 7.5 GB of memory is required as the entire word vectors need to be instantiated in memory to create the new matrix. Comparing with embeddings with `<UNK>`, which only 4.5 GB is required.
+Without `<UNK>`, at most 7.5 GB of memory is required as the entire word vectors need to be instantiated in memory to create the new matrix. Comparing with embeddings with `<UNK>`, which is much lower as it only requires at most 4.5 GB.
 
 ## Parse citation strings
 
